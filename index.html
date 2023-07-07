@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css"><link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        #map {
+            width: 1480px;
+            height: 838px;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script><script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/vaccination_0.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[-28.165543349877602,-4.977056010477938],[70.90157152534863,170.16791502491003]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        function pop_vaccination_0(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID1'] !== null ? autolinker.link(feature.properties['OBJECTID1'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(feature.properties['OBJECTID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NAME'] !== null ? autolinker.link(feature.properties['NAME'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['POP_EST'] !== null ? autolinker.link(feature.properties['POP_EST'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['POP_RANK'] !== null ? autolinker.link(feature.properties['POP_RANK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['GDP_MD_EST'] !== null ? autolinker.link(feature.properties['GDP_MD_EST'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['POP_YEAR'] !== null ? autolinker.link(feature.properties['POP_YEAR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LASTCENSUS'] !== null ? autolinker.link(feature.properties['LASTCENSUS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['GDP_YEAR'] !== null ? autolinker.link(feature.properties['GDP_YEAR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ECONOMY'] !== null ? autolinker.link(feature.properties['ECONOMY'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['INCOME_GRP'] !== null ? autolinker.link(feature.properties['INCOME_GRP'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ISO_A2'] !== null ? autolinker.link(feature.properties['ISO_A2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ISO_A3'] !== null ? autolinker.link(feature.properties['ISO_A3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['CONTINENT'] !== null ? autolinker.link(feature.properties['CONTINENT'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['REGION_UN'] !== null ? autolinker.link(feature.properties['REGION_UN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SUBREGION'] !== null ? autolinker.link(feature.properties['SUBREGION'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['REGION_WB'] !== null ? autolinker.link(feature.properties['REGION_WB'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['join_OBJECTID'] !== null ? autolinker.link(feature.properties['join_OBJECTID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['COUNTRY'] !== null ? autolinker.link(feature.properties['COUNTRY'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ISO3'] !== null ? autolinker.link(feature.properties['ISO3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WHO_REGION'] !== null ? autolinker.link(feature.properties['WHO_REGION'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['DATA_SOURCE'] !== null ? autolinker.link(feature.properties['DATA_SOURCE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['DATE_UPDATED'] !== null ? autolinker.link(feature.properties['DATE_UPDATED'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['TOTAL_VACCINATIONS'] !== null ? autolinker.link(feature.properties['TOTAL_VACCINATIONS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'] !== null ? autolinker.link(feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['TOTAL_VACCINATIONS_PER100'] !== null ? autolinker.link(feature.properties['TOTAL_VACCINATIONS_PER100'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PERSONS_VACCINATED_1PLUS_DOSE_PER100'] !== null ? autolinker.link(feature.properties['PERSONS_VACCINATED_1PLUS_DOSE_PER100'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PERSONS_LAST_DOSE'] !== null ? autolinker.link(feature.properties['PERSONS_LAST_DOSE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PERSONS_LAST_DOSE_PER100'] !== null ? autolinker.link(feature.properties['PERSONS_LAST_DOSE_PER100'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['VACCINES_USED'] !== null ? autolinker.link(feature.properties['VACCINES_USED'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['FIRST_VACCINE_DATE'] !== null ? autolinker.link(feature.properties['FIRST_VACCINE_DATE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NUMBER_VACCINES_TYPES_USED'] !== null ? autolinker.link(feature.properties['NUMBER_VACCINES_TYPES_USED'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PERSONS_BOOSTER_ADD_DOSE'] !== null ? autolinker.link(feature.properties['PERSONS_BOOSTER_ADD_DOSE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PERSONS_BOOSTER_ADD_DOSE_PER100'] !== null ? autolinker.link(feature.properties['PERSONS_BOOSTER_ADD_DOSE_PER100'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SHAPE_Length'] !== null ? autolinker.link(feature.properties['SHAPE_Length'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SHAPE_Area'] !== null ? autolinker.link(feature.properties['SHAPE_Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_vaccination_0_0(feature) {
+            if (feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'] >= 0.000000 && feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'] <= 159128.000000 ) {
+                return {
+                pane: 'pane_vaccination_0',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,255,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'] >= 159128.000000 && feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'] <= 1276753.400000 ) {
+                return {
+                pane: 'pane_vaccination_0',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(196,224,191,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'] >= 1276753.400000 && feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'] <= 5366301.600000 ) {
+                return {
+                pane: 'pane_vaccination_0',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(137,192,128,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'] >= 5366301.600000 && feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'] <= 17148274.800000 ) {
+                return {
+                pane: 'pane_vaccination_0',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(78,160,64,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'] >= 17148274.800000 && feature.properties['PERSONS_VACCINATED_1PLUS_DOSE'] <= 1317994878.000000 ) {
+                return {
+                pane: 'pane_vaccination_0',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(19,128,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_vaccination_0');
+        map.getPane('pane_vaccination_0').style.zIndex = 400;
+        map.getPane('pane_vaccination_0').style['mix-blend-mode'] = 'normal';
+        var layer_vaccination_0 = new L.geoJson(json_vaccination_0, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_vaccination_0',
+            layerName: 'layer_vaccination_0',
+            pane: 'pane_vaccination_0',
+            onEachFeature: pop_vaccination_0,
+            style: style_vaccination_0_0,
+        });
+        bounds_group.addLayer(layer_vaccination_0);
+        map.addLayer(layer_vaccination_0);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'vaccination<br /><table><tr><td style="text-align: center;"><img src="legend/vaccination_0_01591280.png" /></td><td>0 - 159128</td></tr><tr><td style="text-align: center;"><img src="legend/vaccination_0_15912812767531.png" /></td><td>159128 - 1276753</td></tr><tr><td style="text-align: center;"><img src="legend/vaccination_0_127675353663022.png" /></td><td>1276753 - 5366302</td></tr><tr><td style="text-align: center;"><img src="legend/vaccination_0_5366302171482753.png" /></td><td>5366302 - 17148275</td></tr><tr><td style="text-align: center;"><img src="legend/vaccination_0_1714827513179948784.png" /></td><td>17148275 - 1317994878</td></tr></table>': layer_vaccination_0,}).addTo(map);
+        setBounds();
+        </script>
+    </body>
+</html>
